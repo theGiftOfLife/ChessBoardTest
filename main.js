@@ -22,8 +22,8 @@ let position = {
     '-','-','-','-','-','-','-','-',
     '-','-','-','-','-','-','-','-',
     '-','-','-','-','-','-','-','-',
-    'R','N','B','Q','K','B','N','R',
     'P','P','P','P','P','P','P','P',
+    'R','N','B','Q','K','B','N','R',
     ]
     ,
     whiteMove: true, 
@@ -38,21 +38,32 @@ function onDragOver(ev) {
     ev.preventDefault()
 }
 
+function canMove( pieceId ){
+    if( document.getElementById(pieceId).classList[0].includes("white") == position.whiteMove ){
+        return true
+    }
+    else{
+        return false
+    }
+}
+
 function onDrop (ev) {
     ev.preventDefault()
-    let data = ev.dataTransfer.getData('pieceId')
+    let pieceId = ev.dataTransfer.getData('pieceId')
+    if(!canMove(pieceId)) return
     // Target can be div.square(z-index:1) or div.piece(z-index:2) or drop-box
     if ( ev.target.classList.contains('square') || ev.target.classList.contains('drop-box') ) {
         ev.target.append(document.getElementById(ev.dataTransfer.getData("pieceId")))
     }
     else if ( ev.target.classList.contains('piece') ) {
         // If target is the same piece
-        if ( ev.target ===  document.getElementById(data)){
-            return
+        if ( ev.target ===  document.getElementById(pieceId)){
+            // don't do anything yet
+        } else {
+            // If target is different piece that put other piece to drop-box
+            ev.target.parentNode.append(document.getElementById(ev.dataTransfer.getData("pieceId")))
+            document.getElementById('drop-box').append(ev.target) // Target is a piece
         }
-        // 
-        ev.target.parentNode.append(document.getElementById(ev.dataTransfer.getData("pieceId")))
-        document.getElementById('drop-box').append(ev.target) // Target is a piece
     }
     boardToPosition()
 }
@@ -105,6 +116,7 @@ function boardToPosition(){
         }
     }
     console.log(position)
+    position.whiteMove = !position.whiteMove
 }
 
 initBoard()
