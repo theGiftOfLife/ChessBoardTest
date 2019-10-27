@@ -38,7 +38,7 @@ function onDragOver(ev) {
     ev.preventDefault()
 }
 
-function canMove( pieceId ){
+function canMove( pieceId ) {
     if( document.getElementById(pieceId).classList[0].includes("white") == position.whiteMove ){
         return true
     }
