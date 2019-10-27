@@ -1,0 +1,56 @@
+* {
+  margin: 0px;
+  padding: 0px;
+}
+
+.main-container {
+  position: relative;
+  width: 800px;
+  height: 600px;
+  background-color: darkslategrey;
+}
+
+.board {
+  position: absolute;
+  left: 40px;
+  width: 480px;
+  height: 480px;
+}
+
+.drop-box {
+  position: absolute;
+  left: 540px;
+  width: 200px;
+  height: 200px;
+  background-color: aqua;
+}
+
+.square {
+	position: relative;
+	float: left;
+	color: white;
+	width: 60px;
+  height: 60px;
+  z-index: 1;
+}
+
+.dark-square {
+	background-color: #808080;
+}
+
+.light-square {
+	background-color: #a0a0a0;
+}
+
+.glowing-border:hover {
+  box-shadow: 0 0 10px #9ecaed inset;
+}
+
+.piece {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  z-index: 2;
+  background-size: cover;
+  float: left;
+}
