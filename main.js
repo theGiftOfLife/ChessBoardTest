@@ -1,123 +1,82 @@
 "use strict"
-const board = document.getElementById('board')
-let squares = [] 
 const pieceClasses = {
     'P': 'pawn-white', 'N': 'knight-white', 'B': 'bishop-white', 
     'R': 'rook-white', 'Q': 'queen-white', 'K': 'king-white',
     'p': 'pawn-black', 'n': 'knight-black', 'b': 'bishop-black', 
     'r': 'rook-black', 'q': 'queen-black', 'k': 'king-black'
 }
-
-let revPieceClasses = {};
-for (let k in pieceClasses){
-    let v = pieceClasses[k]
-	revPieceClasses[v] = k
-}
-
-let position = {
-    board:[
-    'r','n','b','q','k','b','n','r',
-    'p','p','p','p','p','p','p','p',
-    '-','-','-','-','-','-','-','-',
-    '-','-','-','-','-','-','-','-',
-    '-','-','-','-','-','-','-','-',
-    '-','-','-','-','-','-','-','-',
-    'P','P','P','P','P','P','P','P',
-    'R','N','B','Q','K','B','N','R',
-    ]
-    ,
-    whiteMove: true, 
-    sc: true, lc: true, LC: true, SC: true
-}
-
-function onDragStart(ev){
-    ev.dataTransfer.setData('pieceId', ev.target.id)
-}
-
-function onDragOver(ev) {
-    ev.preventDefault()
-}
-
-function canMove( pieceId ) {
-    if( document.getElementById(pieceId).classList[0].includes("white") == position.whiteMove ){
-        return true
-    }
-    else{
-        return false
+class Piece {
+    constructor(pCoord, pType, pId){
+        this.pCoord = pCoord
+        this.pType = pType
+        this.pClass = pieceClasses[pType] 
+        this.elem = document.createElement('div')
+        this.elem.classList.add(this.pClass, 'piece')
+        this.elem.setAttribute('draggable', true);
+        this.elem.setAttribute('ondragstart', 'onDragStart(event)'); // Add event handler!!!
+        this.pId = pId
     }
 }
 
-function onDrop (ev) {
-    ev.preventDefault()
-    let pieceId = ev.dataTransfer.getData('pieceId')
-    if(!canMove(pieceId)) return
-    // Target can be div.square(z-index:1) or div.piece(z-index:2) or drop-box
-    if ( ev.target.classList.contains('square') || ev.target.classList.contains('drop-box') ) {
-        ev.target.append(document.getElementById(ev.dataTransfer.getData("pieceId")))
-    }
-    else if ( ev.target.classList.contains('piece') ) {
-        // If target is the same piece
-        if ( ev.target ===  document.getElementById(pieceId)){
-            // don't do anything yet
-        } else {
-            // If target is different piece that put other piece to drop-box
-            ev.target.parentNode.append(document.getElementById(ev.dataTransfer.getData("pieceId")))
-            document.getElementById('drop-box').append(ev.target) // Target is a piece
-        }
-    }
-    boardToPosition()
+
+let initPosition = 
+'rnbqkbnr'+
+'pppppppp'+
+'----k---'+
+'--------'+
+'---P----'+
+'--------'+
+'PPPPPPPP'+
+'RNBQKBNR'
+
+let initPieceSet = []
+// Position is a number starting from top left corner
+// Coordinates is an array [x,y] starting from top left corner
+function posToCoord(pos){
+    return [pos % 8, Math.floor(pos / 8)]
 }
+function coordToPos(coord){
+    return coord[1]*8 + coord[0]
+}
+// Create initial piece set
+for (let i=0;i<64;i++){
+    if(initPosition[i]!='-')
+        initPieceSet.push( new Piece( posToCoord(i), initPosition[i], `${initPosition[i]}-${i}` ) )
+}
+console.log(initPieceSet)
+
+const board = document.getElementById('board')
+let squares = [] 
 
 function initBoard() { 
     // Create squares and append to the board
     for (let i = 0, j = true; i < 64; i++) {
-        let s = document.createElement('div');
-        s.classList.add('square', 'glowing-border');
-        s.setAttribute('ondragover', 'onDragOver(event)');
-		s.setAttribute('ondrop', 'onDrop(event)')
+        let square = document.createElement('div');
+        square.classList.add('square', 'glowing-border');
+        // Add event hadlers!!!
+        square.setAttribute('ondragover', 'onDragOver(event)');
+		square.setAttribute('ondrop', 'onDrop(event)')
         if (i % 8 != 0) {
             j = !j;
         }
         if (j) {
-            s.classList.add('light-square');
+            square.classList.add('light-square');
         } else {
-            s.classList.add('dark-square');
+            square.classList.add('dark-square');
         }
-        squares.push(s)
-        board.appendChild(s);
+        squares.push(square)
+        board.appendChild(square);
     }
-}
-
-function positionToBoard () { 
-    for (let i = 0; i < 64; i++) {
-        if(position.board[i] != '-') {
-            let piece = document.createElement('div')
-            piece.setAttribute('draggable', true);
-	        piece.setAttribute('ondragstart', 'onDragStart(event)');
-            piece.classList.add(pieceClasses[position.board[i]], 'piece') // Important line
-            piece.id = `piece-${i}`
-            // remove all children if any
-            // stupid version of managing pieces
-            while(squares[i].firstChild){
-                squares[i].removeChild(squares[i].firstChild)
-            }
-            squares[i].append(piece)
-        }
-    }
-}
-
-function boardToPosition(){
-    for (let i = 0; i < 64; i++) {
-        if(squares[i].children.length > 0){
-            position.board[i] = revPieceClasses[ squares[i].children[0].classList[0] ]
-        }
-        else {
-            position.board[i] = '-'
-        }
-    }
-    console.log(position)
-    position.whiteMove = !position.whiteMove
 }
 
 initBoard()
-positionToBoard()
+
+
+function putPiecesOnBoard(){
+    for(let i=0;i<initPieceSet.length;i++){
+        let pos = coordToPos(initPieceSet[i].pCoord)
+        squares[pos].append(initPieceSet[i].elem)
+    }
+}
+
+putPiecesOnBoard()
