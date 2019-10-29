@@ -53,11 +53,15 @@ function coordToPos(coord){
     return coord[1]*8 + coord[0]
 }
 
+let pc = {'p':0,'r':0,'n':0,'b':0,'q':0,'k':0,'P':0,'R':0,'N':0,'B':0,'Q':0,'K':0}
+
 function createPieceSet(){
     for (let i=0;i<64;i++){
         if(position[i]!='-'){
             let piece = document.createElement('div')
-            piece.id = `${position[i]}${i}`
+            // piece.id = `${position[i]}${i}`
+            piece.id = `${position[i]}${pc[position[i]]}`
+            pc[position[i]]+=1
             // Data attributes
             piece.setAttribute('data-pos', i)
             piece.setAttribute('data-ptype', position[i])
@@ -69,7 +73,6 @@ function createPieceSet(){
             // Push
             pieceSet.push( piece )
         }
-            
     }
 }
 createPieceSet()
