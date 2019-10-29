@@ -1,25 +1,40 @@
 "use strict"
+
 const pieceClasses = {
     'P': 'pawn-white', 'N': 'knight-white', 'B': 'bishop-white', 
     'R': 'rook-white', 'Q': 'queen-white', 'K': 'king-white',
     'p': 'pawn-black', 'n': 'knight-black', 'b': 'bishop-black', 
     'r': 'rook-black', 'q': 'queen-black', 'k': 'king-black'
 }
-class Piece {
-    constructor(pCoord, pType, pId){
-        this.pCoord = pCoord
-        this.pType = pType
-        this.pClass = pieceClasses[pType] 
-        this.elem = document.createElement('div')
-        this.elem.classList.add(this.pClass, 'piece')
-        this.elem.setAttribute('draggable', true);
-        this.elem.setAttribute('ondragstart', 'onDragStart(event)'); // Add event handler!!!
-        this.pId = pId
+
+function onDragStart(ev){
+    ev.dataTransfer.setData('pieceId', ev.target.id)
+}
+
+function onDragOver(ev) {
+    ev.preventDefault()
+}
+
+function onDrop (ev) {
+    ev.preventDefault()
+    let pieceId = ev.dataTransfer.getData('pieceId')
+    // if(!canMove(pieceId)) return
+    if ( ev.target.classList.contains('square') || ev.target.classList.contains('drop-box') ) {
+        ev.target.append(document.getElementById(ev.dataTransfer.getData("pieceId")))
+    }
+    else if ( ev.target.classList.contains('piece') ) {
+        // If target is the same piece
+        if ( ev.target ===  document.getElementById(pieceId)){
+            // don't do anything yet
+        } else {
+            // If target is different piece that put other piece to drop-box
+            ev.target.parentNode.append(document.getElementById(ev.dataTransfer.getData("pieceId")))
+            document.getElementById('drop-box').append(ev.target) // Target is a piece
+        }
     }
 }
 
-
-let initPosition = 
+let position = 
 'rnbqkbnr'+
 'pppppppp'+
 '----k---'+
@@ -29,27 +44,42 @@ let initPosition =
 'PPPPPPPP'+
 'RNBQKBNR'
 
-let initPieceSet = []
-// Position is a number starting from top left corner
-// Coordinates is an array [x,y] starting from top left corner
+let pieceSet = []
+
 function posToCoord(pos){
     return [pos % 8, Math.floor(pos / 8)]
 }
 function coordToPos(coord){
     return coord[1]*8 + coord[0]
 }
-// Create initial piece set
-for (let i=0;i<64;i++){
-    if(initPosition[i]!='-')
-        initPieceSet.push( new Piece( posToCoord(i), initPosition[i], `${initPosition[i]}-${i}` ) )
+
+function createPieceSet(){
+    for (let i=0;i<64;i++){
+        if(position[i]!='-'){
+            let piece = document.createElement('div')
+            piece.id = `${position[i]}${i}`
+            // Data attributes
+            piece.setAttribute('data-pos', i)
+            piece.setAttribute('data-ptype', position[i])
+            // Event hadlers
+            piece.setAttribute('draggable', true);
+            piece.setAttribute('ondragstart', 'onDragStart(event)');
+            // Class
+            piece.classList.add(pieceClasses[position[i]], 'piece')
+            // Push
+            pieceSet.push( piece )
+        }
+            
+    }
 }
-console.log(initPieceSet)
+createPieceSet()
+console.log(pieceSet)
 
 const board = document.getElementById('board')
 let squares = [] 
 
 function initBoard() { 
-    // Create squares and append to the board
+    // Create squares and append them to the board
     for (let i = 0, j = true; i < 64; i++) {
         let square = document.createElement('div');
         square.classList.add('square', 'glowing-border');
@@ -73,10 +103,12 @@ initBoard()
 
 
 function putPiecesOnBoard(){
-    for(let i=0;i<initPieceSet.length;i++){
-        let pos = coordToPos(initPieceSet[i].pCoord)
-        squares[pos].append(initPieceSet[i].elem)
+    for(let i=0;i<pieceSet.length;i++){
+        // let pos = coordToPos(pieceSet[i].pCoord)
+        let pos = Number( pieceSet[i].dataset.pos )
+        squares[pos].append(pieceSet[i])
     }
 }
 
 putPiecesOnBoard()
+
