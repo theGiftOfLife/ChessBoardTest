@@ -5,22 +5,29 @@
 
 .main-container {
   position: relative;
-  width: 800px;
+  margin: auto;
+  width: 75%;
+  height: auto;
   height: 600px;
   background-color: darkslategrey;
+  text-align: center;
 }
 
 .board {
-  position: absolute;
-  left: 40px;
+  float: left;
+  position: relative;
+  margin: 10px;
   width: 480px;
   height: 480px;
 }
 
 .drop-box {
-  position: absolute;
-  left: 540px;
-  width: 200px;
+  float: left;
+  position: relative;
+  margin: 10px;
+  margin-left: 0;
+  /* width: 200px; */
+  width: 25%;
   height: 480px;
   background-color: aqua;
 }
@@ -44,6 +51,14 @@
 
 .glowing-border:hover {
   box-shadow: 0 0 10px #9ecaed inset;
+}
+
+.glowing-move-start { 
+  box-shadow: 0 0 20px #edd89e inset;
+}
+
+.glowing-move-end { 
+  box-shadow: 0 0 10px #73d65f inset;
 }
 
 .piece {

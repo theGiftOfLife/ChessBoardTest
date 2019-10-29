@@ -45,6 +45,7 @@ let position =
 'RNBQKBNR'
 
 let pieceSet = []
+let moveWhite = true
 
 function posToCoord(pos){
     return [pos % 8, Math.floor(pos / 8)]
@@ -53,7 +54,10 @@ function coordToPos(coord){
     return coord[1]*8 + coord[0]
 }
 
-let pc = {'p':0,'r':0,'n':0,'b':0,'q':0,'k':0,'P':0,'R':0,'N':0,'B':0,'Q':0,'K':0}
+let pc = {}
+for(let k in pieceClasses)
+    pc[k]=0
+// pc = {'p':0,'r':0,'n':0,'b':0,'q':0,'k':0,'P':0,'R':0,'N':0,'B':0,'Q':0,'K':0}
 
 function createPieceSet(){
     for (let i=0;i<64;i++){
@@ -78,7 +82,6 @@ function createPieceSet(){
 createPieceSet()
 console.log(pieceSet)
 
-const board = document.getElementById('board')
 let squares = [] 
 
 function initBoard() { 
@@ -98,7 +101,7 @@ function initBoard() {
             square.classList.add('dark-square');
         }
         squares.push(square)
-        board.appendChild(square);
+        document.getElementById('board').appendChild(square);
     }
 }
 
@@ -107,11 +110,34 @@ initBoard()
 
 function putPiecesOnBoard(){
     for(let i=0;i<pieceSet.length;i++){
-        // let pos = coordToPos(pieceSet[i].pCoord)
         let pos = Number( pieceSet[i].dataset.pos )
         squares[pos].append(pieceSet[i])
     }
 }
 
 putPiecesOnBoard()
+
+const moveMatrix = {
+    'p':[[0,1],[0,2],[1,1],[1,-1]],
+    'P':[[0,-1],[0,-2],[1,-1],[-1,-1]],
+    'n':[[1,2],[-1,2],[1,-2],[-1,-2],[2,1],[-2,1],[2,-1],[-2,-1]],
+    'N':[[1,2],[-1,2],[1,-2],[-1,-2],[2,1],[-2,1],[2,-1],[-2,-1]],
+
+}
+
+pieceSet.forEach((p)=>{
+    let pPos = p.dataset.pos
+    let pCoord = posToCoord( Number(pPos) )
+    if(moveMatrix[ p.dataset.ptype ] ){
+
+        moveMatrix[ p.dataset.ptype ].forEach((mm) => {
+            let destCoord = [pCoord[0]+mm[0],pCoord[1]+mm[1]]
+            if(destCoord[0]>=0&&destCoord[1]>=0&&destCoord[0]<=7&&destCoord[1]<=7){ // move is within a board
+                let destPos = coordToPos( destCoord )
+                squares[pPos].classList.add('glowing-move-start')
+                squares[destPos].classList.add('glowing-move-end')
+            }
+        })
+    }
+})
 
